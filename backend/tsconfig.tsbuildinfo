@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/middleware.ts","./src/prismaclient.ts","./src/controllers/coursecontroller.ts","./src/controllers/usercontroler.ts","./src/routers/course.ts","./src/routers/user.ts"],"version":"5.9.3"}
