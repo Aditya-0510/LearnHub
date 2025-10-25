@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-cornflower-blue-50: #f1f5fd;
+--color-cornflower-blue-100: #e0e8f9;
+--color-cornflower-blue-200: #c9d8f4;
+--color-cornflower-blue-300: #a3beed;
+--color-cornflower-blue-400: #749ae2;
+--color-cornflower-blue-500: #577cda;
+--color-cornflower-blue-600: #4360cd;
+--color-cornflower-blue-700: #394ebc;
+--color-cornflower-blue-800: #344299;
+--color-cornflower-blue-900: #2e3a7a;
+--color-cornflower-blue-950: #20264b;
+
+
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --background: #0a0a0a;
+    --foreground: #ededed; */
+  }
+}
+
+body {
+  font-family: var(--font-geist-mono); 
+  background: var(--background);
+  color: var(--foreground);
+}
