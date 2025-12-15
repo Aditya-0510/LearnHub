@@ -26,7 +26,7 @@ courseRouter.get("/:courseId", getCourseById)           //s
 courseRouter.post("/:courseId/lessons", addLesson)      //i
 courseRouter.get("/:courseId/lessons", getLessons)      //s + i
 
-courseRouter.post("/:courseId/enrol", enrollCourse)     //s
+courseRouter.post("/:courseId/enroll", enrollCourse)     //s
 courseRouter.get("/enrolled", getUserCourses)           //s
 
 courseRouter.post("/:courseId/reviews", addReview)      //s

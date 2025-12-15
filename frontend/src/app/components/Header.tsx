@@ -54,10 +54,10 @@ const Header = () => {
 
             {isAuthenticated && role === 'INSTRUCTOR' && (
               <>
-                <Link href="/instructor/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
+                <Link href="/dashboard" className="text-gray-700 hover:text-blue-600 font-medium">
                   Instructor Dashboard
                 </Link>
-                <Link href="/instructor/manage-courses" className="text-gray-700 hover:text-blue-600 font-medium">
+                <Link href="/manage-courses" className="text-gray-700 hover:text-blue-600 font-medium">
                   Manage Courses
                 </Link>
               </>
