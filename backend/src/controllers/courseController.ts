@@ -21,9 +21,16 @@ export const getAllCourses = async(req: Request, res: Response)=>{
 export const getCourseById = async (req: Request, res: Response) => {
     try {
         const { courseId } = req.params;
+        if (!courseId) {
+            return res.status(400).json({ error: "Course ID is required" });
+        }
+        const id = parseInt(courseId, 10); 
+         if (isNaN(id)) {
+            return res.status(400).json({ error: "Invalid course ID" });
+        }
         const course = await client.course.findUnique({
             where: {
-                id: Number(courseId)
+                id
             },
             include: {
                 instructor: {
@@ -246,6 +253,8 @@ export const enrollCourse = async (req: Request, res: Response) => {
 export const getUserCourses = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
+    console.log('User object:', user);
+    console.log('User role:', user?.role);
     if(user.role==="STUDENT"){
         try{
             const userId = user.id;
@@ -258,7 +267,7 @@ export const getUserCourses = async (req: Request, res: Response) => {
                 }
             })
             console.log(courses);
-            if(!courses){
+            if(!courses || courses.length===0){
                 return res.status(404).json({ message: "You are not enrolled in any courses" });
             }
             res.json({
@@ -273,6 +282,7 @@ export const getUserCourses = async (req: Request, res: Response) => {
         }
     }
     else {
+        console.log('User is not a student, returning 403')
         res.status(403).json({ message: "Unauthorized" });
     }
 }
