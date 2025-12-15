@@ -31,8 +31,8 @@ export default function Dashboard() {
         // Choose endpoint based on role
         const endpoint =
           role === 'STUDENT'
-            ? 'http://localhost:4000/api/courses/student/courses'
-            : 'http://localhost:4000/api/courses/instructor/courses'
+            ? 'http://localhost:4000/api/courses/enrolled'
+            : 'http://localhost:4000/api/courses/instructor'
 
         const res = await fetch(endpoint, {
           headers: {
@@ -47,9 +47,11 @@ export default function Dashboard() {
         const data = await res.json()
         setCourses(data.courses || [])
         console.log(courses);
-      } catch (error) {
+      } 
+      catch (error) {
         console.error('Error fetching courses:', error)
-      } finally {
+      } 
+      finally {
         setLoading(false)
       }
     }

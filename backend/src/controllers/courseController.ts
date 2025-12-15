@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import client from "../prismaClient.js";
+import client from "../prismaClient";
 
 export const getAllCourses = async(req: Request, res: Response)=>{
     try{
@@ -14,6 +14,42 @@ export const getAllCourses = async(req: Request, res: Response)=>{
         console.error(error);
         res.status(500).json({
             message: "Error in fecthing courses",
+        });
+    }
+}
+
+export const getCourseById = async (req: Request, res: Response) => {
+    try {
+        const { courseId } = req.params;
+        const course = await client.course.findUnique({
+            where: {
+                id: Number(courseId)
+            },
+            include: {
+                instructor: {
+                    select: {
+                        username: true
+                    }
+                },
+                _count: {
+                    select: {
+                        lessons: true,
+                        enrollments: true
+                    }
+                }
+            }
+        });
+
+        if (!course) {
+            return res.status(404).json({ message: "Course not found" });
+        }
+
+        res.json({ course });
+    } 
+    catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error in fetching course",
         });
     }
 }

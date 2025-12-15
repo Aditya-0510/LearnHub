@@ -1,5 +1,5 @@
 import { Router } from "express";
-import authMiddleware from "../middleware.js";
+import authMiddleware from "../middleware";
 import {
   getAllCourses,
   createCourse,
@@ -9,22 +9,27 @@ import {
   getUserCourses,
   addReview,
   getReviews,
-  getInstructorCourses
-} from "../controllers/courseController.js";
+  getInstructorCourses,
+  getCourseById
+} from "../controllers/courseController";
 
 const courseRouter = Router();
 
-courseRouter.get("/", getAllCourses)
+courseRouter.get("/", getAllCourses)                    //public
 
 courseRouter.use(authMiddleware)
 
-courseRouter.post("/create", createCourse)              //instructor
-courseRouter.post("/:courseId/lessons", addLesson)      //instructor
-courseRouter.get("/instructor/courses", getInstructorCourses)
-courseRouter.get("/:courseId/lessons", getLessons)      //student + i
-courseRouter.post("/:courseId/join", enrollCourse)      //student
-courseRouter.get("/student/courses", getUserCourses)    //student
-courseRouter.post("/:courseId/reviews", addReview)      //student
-courseRouter.get("/:courseId/reviews", getReviews)      //student + i
+courseRouter.post("/", createCourse)                    //i
+courseRouter.get("/instructor", getInstructorCourses)   //i
+courseRouter.get("/:courseId", getCourseById)           //s
+
+courseRouter.post("/:courseId/lessons", addLesson)      //i
+courseRouter.get("/:courseId/lessons", getLessons)      //s + i
+
+courseRouter.post("/:courseId/enrol", enrollCourse)     //s
+courseRouter.get("/enrolled", getUserCourses)           //s
+
+courseRouter.post("/:courseId/reviews", addReview)      //s
+courseRouter.get("/:courseId/reviews", getReviews)      //s + i
 
 export default courseRouter

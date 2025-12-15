@@ -1,5 +1,6 @@
 'use client'
 import { createContext, useContext, useEffect, useState } from 'react'
+// import { useRouter, usePathname } from 'next/navigation'
 
 interface AuthContextType {
   isAuthenticated: boolean
@@ -14,6 +15,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [role, setRole] = useState<string | null>(null)
+  // const router = useRouter()
+  // const pathname = usePathname()
+  // const [isLoading, setIsLoading] = useState(true)
 
   const checkAuth = () => {
     const token = localStorage.getItem('token')
@@ -25,6 +29,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     checkAuth()
   }, [])
+
+  // useEffect(() => {
+  //   if (isLoading) return 
+
+  //   const publicPaths = ['/', '/login', '/signup']
+  //   const isPublicPath = publicPaths.includes(pathname)
+
+  //   if (isAuthenticated && isPublicPath) { 
+  //     router.push('/dashboard')
+  //   }
+
+  //   if (!isAuthenticated && !isPublicPath) {
+  //     router.push('/login')
+  //   }
+  // }, [isAuthenticated, role, pathname, router, isLoading])
+
+  // if (isLoading) {
+  //   return <div>Loading...</div> 
+  // }
 
   return (
     <AuthContext.Provider
