@@ -33,7 +33,7 @@ export default function LessonViewerPage({ params }: { params: Promise<{ courseI
         // Actually, let's just fetch lessons. API checks enrollment.
         
         // Fetch Lessons
-        const res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, { headers });
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons`, { headers });
         
         if (res.status === 403 || res.status === 404) {
              setError("You are not enrolled in this course or it doesn't exist.");

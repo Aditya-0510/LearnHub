@@ -27,7 +27,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       const headers = { Authorization: token };
 
       // Fetch course details
-      const courseRes = await fetch(`http://localhost:4000/api/courses/${id}`, { headers });
+      const courseRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}`, { headers });
       if (courseRes.ok) {
         const data = await courseRes.json();
         setCourse(data.course);
@@ -40,7 +40,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
       }
 
       // Fetch reviews
-      const reviewsRes = await fetch(`http://localhost:4000/api/courses/${id}/reviews`, { headers });
+      const reviewsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}/reviews`, { headers });
       if (reviewsRes.ok) {
         const data = await reviewsRes.json();
         setReviews(data.reviews || []);
@@ -52,7 +52,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
          // We can infer from errors or fetch all enrolled courses. 
          // For now, let's rely on the user trying to enroll or the button state. 
          // Actually, let's fetch enrolled courses to check state.
-         const enrolledRes = await fetch('http://localhost:4000/api/courses/enrolled', { headers });
+         const enrolledRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/enrolled`, { headers });
          if(enrolledRes.ok) {
              const data = await enrolledRes.json();
              const enrolledIds = data.courses?.map((e: any) => e.courseId) || [];
@@ -87,7 +87,7 @@ export default function CourseDetailsPage({ params }: { params: Promise<{ id: st
     setEnrolling(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/api/courses/${id}/enroll`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${id}/enroll`, {
         method: 'POST',
         headers: {
           Authorization: token || '',

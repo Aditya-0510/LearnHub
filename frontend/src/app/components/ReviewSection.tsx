@@ -26,7 +26,7 @@ export default function ReviewSection({ courseId, reviews, onReviewAdded }: Revi
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/api/courses/${courseId}/reviews`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/reviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -32,7 +32,7 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
       const headers = { Authorization: token || '' };
 
       // Fetch Course
-      const courseRes = await fetch(`http://localhost:4000/api/courses/${courseId}`, { headers });
+      const courseRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}`, { headers });
       if (courseRes.ok) {
         const data = await courseRes.json();
         setCourse(data.course);
@@ -41,7 +41,7 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
       }
 
       // Fetch Lessons
-      const lessonsRes = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, { headers });
+      const lessonsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons`, { headers });
       if (lessonsRes.ok) {
         const data = await lessonsRes.json();
         setLessons(data.lessons || []);
@@ -77,14 +77,14 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
       let res;
       if (editingLessonId) {
           // Update existing lesson
-          res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons/${editingLessonId}`, {
+          res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons/${editingLessonId}`, {
               method: 'PUT',
               headers,
               body
           });
       } else {
           // Create new lesson
-          res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, {
+          res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/courses/${courseId}/lessons`, {
               method: 'POST',
               headers,
               body

@@ -36,8 +36,8 @@ export default function Dashboard() {
         // Choose endpoint based on role
         const endpoint =
           role === 'STUDENT'
-            ? 'http://localhost:4000/api/courses/enrolled'
-            : 'http://localhost:4000/api/courses/instructor'
+            ? `${process.env.NEXT_PUBLIC_API_URL}/courses/enrolled`
+            : `${process.env.NEXT_PUBLIC_API_URL}/courses/instructor`
 
         const res = await fetch(endpoint, {
           headers: {
