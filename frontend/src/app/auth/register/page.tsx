@@ -290,6 +290,7 @@ export default function Register() {
                 <div className="flex flex-col gap-y-1">
                     <label className="text-sm font-medium text-blue-700">User Role *</label>
                     <select
+                        aria-label="Select user role"
                         value={formData.role}
                         onChange={(e) => handleInputChange('role', e.target.value as Role)}
                         className={`p-3 outline-none border rounded-md transition-colors focus:ring-2 focus:ring-blue-500  ${

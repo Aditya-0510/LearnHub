@@ -90,6 +90,7 @@ export default function ReviewSection({ courseId, reviews, onReviewAdded }: Revi
               <div className="flex space-x-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
+                    aria-label="Rating"
                     type="button"
                     key={star}
                     onClick={() => setRating(star)}
