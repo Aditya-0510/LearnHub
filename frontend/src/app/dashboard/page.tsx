@@ -22,6 +22,8 @@ export default function Dashboard() {
         return
       }
 
+      setLoading(true) // Ensure loading is true when we start fetching
+
       try {
         const token = localStorage.getItem('token')
         console.log('Token being sent:', token)

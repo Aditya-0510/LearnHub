@@ -21,6 +21,7 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
   
   // Lesson Form State
   const [showLessonForm, setShowLessonForm] = useState(false);
+  const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonContent, setLessonContent] = useState('');
   const [submittingLesson, setSubmittingLesson] = useState(false);
@@ -61,36 +62,62 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
     }
   }, [isAuthenticated, role, courseId]);
 
-  const handleAddLesson = async (e: React.FormEvent) => {
+  const handleLessonSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmittingLesson(true);
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, {
-        method: 'POST',
-        headers: {
+      const headers = {
           'Content-Type': 'application/json',
           'Authorization': token || '',
-        },
-        body: JSON.stringify({ title: lessonTitle, content: lessonContent }),
-      });
+      };
+      const body = JSON.stringify({ title: lessonTitle, content: lessonContent });
+
+      let res;
+      if (editingLessonId) {
+          // Update existing lesson
+          res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons/${editingLessonId}`, {
+              method: 'PUT',
+              headers,
+              body
+          });
+      } else {
+          // Create new lesson
+          res = await fetch(`http://localhost:4000/api/courses/${courseId}/lessons`, {
+              method: 'POST',
+              headers,
+              body
+          });
+      }
 
       if (res.ok) {
-        setLessonTitle('');
-        setLessonContent('');
-        setShowLessonForm(false);
+        resetForm();
         fetchCourseData(); // Refresh list
       } else {
-        alert('Failed to add lesson');
+        alert(`Failed to ${editingLessonId ? 'update' : 'add'} lesson`);
       }
     } catch (error) {
       console.error(error);
-      alert('Error adding lesson');
+      alert('Error saving lesson');
     } finally {
       setSubmittingLesson(false);
     }
   };
+
+  const startEditing = (lesson: Lesson) => {
+      setEditingLessonId(lesson.id);
+      setLessonTitle(lesson.title);
+      setLessonContent(lesson.content);
+      setShowLessonForm(true);
+  }
+
+  const resetForm = () => {
+      setLessonTitle('');
+      setLessonContent('');
+      setEditingLessonId(null);
+      setShowLessonForm(false);
+  }
 
   if (!isAuthenticated || role !== 'INSTRUCTOR') {
       return <div className="p-8 text-center">Access Restricted</div>;
@@ -132,7 +159,10 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold text-gray-900">Lessons ({lessons.length})</h2>
                     <button
-                        onClick={() => setShowLessonForm(!showLessonForm)}
+                        onClick={() => {
+                            if (showLessonForm) resetForm();
+                            else setShowLessonForm(true);
+                        }}
                         className="bg-cornflower-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cornflower-blue-700 transition-colors"
                     >
                         {showLessonForm ? 'Cancel' : 'Add New Lesson'}
@@ -140,8 +170,8 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
                 </div>
 
                 {showLessonForm && (
-                     <form onSubmit={handleAddLesson} className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                        <h3 className="text-md font-bold text-gray-900 mb-4">New Lesson</h3>
+                     <form onSubmit={handleLessonSubmit} className="mb-8 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                        <h3 className="text-md font-bold text-gray-900 mb-4">{editingLessonId ? 'Edit Lesson' : 'New Lesson'}</h3>
                         <Input 
                             label="Title" 
                             value={lessonTitle}
@@ -155,13 +185,22 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
                             required
                             placeholder="Enter lesson content here (Markdown supported)..."
                         />
-                         <div className="flex justify-end">
+                         <div className="flex justify-end space-x-2">
+                            {editingLessonId && (
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                >
+                                    Cancel
+                                </button>
+                            )}
                             <button
                                 type="submit"
                                 disabled={submittingLesson}
                                 className="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50"
                             >
-                                {submittingLesson ? 'Saving...' : 'Save Lesson'}
+                                {submittingLesson ? 'Saving...' : (editingLessonId ? 'Update Lesson' : 'Save Lesson')}
                             </button>
                         </div>
                      </form>
@@ -177,7 +216,12 @@ export default function ManageCoursePage({ params }: { params: Promise<{ courseI
                                     <span className="text-sm font-mono text-gray-500 mr-2">#{index + 1}</span>
                                     <span className="font-medium text-gray-900">{lesson.title}</span>
                                  </div>
-                                 {/* <button className="text-gray-400 hover:text-cornflower-blue-600">Edit</button> */}
+                                 <button 
+                                    onClick={() => startEditing(lesson)}
+                                    className="text-cornflower-blue-600 hover:text-cornflower-blue-800 font-medium text-sm"
+                                 >
+                                     Edit
+                                 </button>
                             </div>
                         ))
                     )}

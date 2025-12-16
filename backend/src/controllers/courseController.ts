@@ -1,8 +1,8 @@
 import type { Request, Response } from "express";
 import client from "../prismaClient";
 
-export const getAllCourses = async(req: Request, res: Response)=>{
-    try{
+export const getAllCourses = async (req: Request, res: Response) => {
+    try {
         const response = await client.course.findMany({});
         console.log(response);
 
@@ -10,7 +10,7 @@ export const getAllCourses = async(req: Request, res: Response)=>{
             courses: response
         })
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             message: "Error in fecthing courses",
@@ -24,8 +24,8 @@ export const getCourseById = async (req: Request, res: Response) => {
         if (!courseId) {
             return res.status(400).json({ error: "Course ID is required" });
         }
-        const id = parseInt(courseId, 10); 
-         if (isNaN(id)) {
+        const id = parseInt(courseId, 10);
+        if (isNaN(id)) {
             return res.status(400).json({ error: "Invalid course ID" });
         }
         const course = await client.course.findUnique({
@@ -52,7 +52,7 @@ export const getCourseById = async (req: Request, res: Response) => {
         }
 
         res.json({ course });
-    } 
+    }
     catch (error) {
         console.error(error);
         res.status(500).json({
@@ -65,8 +65,8 @@ export const createCourse = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
     console.log(user);
-    if(user.role==="INSTRUCTOR"){
-        try{
+    if (user.role === "INSTRUCTOR") {
+        try {
             const { title, description } = req.body;
             const response = await client.course.create({
                 data: {
@@ -82,7 +82,7 @@ export const createCourse = async (req: Request, res: Response) => {
                 course: response
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in adding course",
@@ -94,12 +94,12 @@ export const createCourse = async (req: Request, res: Response) => {
     }
 }
 
-export const getInstructorCourses = async (req: Request, res: Response) =>{
+export const getInstructorCourses = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
     console.log(user);
-    if(user.role==="INSTRUCTOR"){
-        try{
+    if (user.role === "INSTRUCTOR") {
+        try {
             const courses = await client.course.findMany({
                 where: {
                     instructorId: user.id
@@ -111,7 +111,7 @@ export const getInstructorCourses = async (req: Request, res: Response) =>{
                 courses: courses
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in fecthcing courses",
@@ -124,16 +124,16 @@ export const getInstructorCourses = async (req: Request, res: Response) =>{
 }
 
 export const addLesson = async (req: Request, res: Response) => {
-     //@ts-ignore
+    //@ts-ignore
     const user = req.user;
-    if(user.role==="INSTRUCTOR"){
-        try{
+    if (user.role === "INSTRUCTOR") {
+        try {
             const { title, content } = req.body;
             const { courseId } = req.params;
 
             const course = await client.course.findUnique({
-                where: { 
-                    id: Number(courseId) 
+                where: {
+                    id: Number(courseId)
                 },
             });
             if (!course) {
@@ -151,20 +151,20 @@ export const addLesson = async (req: Request, res: Response) => {
                 }
             })
             console.log(response);
-    
+
             res.json({
                 message: "course added",
                 lesson: response
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in adding course",
             });
         }
     }
-    else{
+    else {
         res.status(403).json({ message: "Unauthorized" });
     }
 }
@@ -172,46 +172,49 @@ export const addLesson = async (req: Request, res: Response) => {
 export const getLessons = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    try{
+    try {
         const { courseId } = req.params;
         const course = await client.course.findUnique({
             where: {
                 id: Number(courseId)
             }
         })
-        if(!course){
+        if (!course) {
             return res.status(404).json({ message: "Course not found" });
         }
 
-        if(user.role==="STUDENT"){
+        if (user.role === "STUDENT") {
             const enrollment = await client.enrollment.findFirst({
                 where: {
                     courseId: Number(courseId)
                 }
             })
-            if(!enrollment){
+            if (!enrollment) {
                 return res.status(404).json({ message: "You are not enrolled in this course" });
             }
         }
-        if(user.role==="INSTRUCTOR"){
-            const match =( course.instructorId === user.id )
-            if(!match){
+        if (user.role === "INSTRUCTOR") {
+            const match = (course.instructorId === user.id)
+            if (!match) {
                 return res.status(404).json({ message: "You don't own this course" });
             }
         }
-        
+
         const lessons = await client.lesson.findMany({
             where: {
                 courseId: Number(courseId)
+            },
+            orderBy: {
+                id: 'asc'
             }
         })
         console.log(lessons);
 
-         res.json({
+        res.json({
             lessons: lessons
         })
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             message: "Error in fecthing lessons",
@@ -219,14 +222,77 @@ export const getLessons = async (req: Request, res: Response) => {
     }
 }
 
+export const updateLesson = async (req: Request, res: Response) => {
+    //@ts-ignore
+    const user = req.user;
+    if (user.role === "INSTRUCTOR") {
+        try {
+            const { title, content } = req.body;
+            const { courseId, lessonId } = req.params;
+
+            const course = await client.course.findUnique({
+                where: {
+                    id: Number(courseId)
+                },
+            });
+            if (!course) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+            if (course.instructorId !== user.id) {
+                return res.status(403).json({ message: "You don't own this course" });
+            }
+
+            const response = await client.lesson.update({
+                where: {
+                    id: Number(lessonId),
+                    courseId: Number(courseId) // Ensure lesson belongs to course
+                },
+                data: {
+                    title: title,
+                    content: content
+                }
+            })
+            console.log(response);
+
+            res.json({
+                message: "lesson updated",
+                lesson: response
+            })
+        }
+        catch (error) {
+            console.error(error);
+            // Handle record not found if lessonId doesn't exist or match
+            res.status(500).json({
+                message: "Error in updating lesson",
+            });
+        }
+    }
+    else {
+        res.status(403).json({ message: "Unauthorized" });
+    }
+}
+
+
 export const enrollCourse = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    if(user.role==="STUDENT"){
-        try{
+    if (user.role === "STUDENT") {
+        try {
             const { courseId } = req.params;
+
+            const existingEnrollment = await client.enrollment.findFirst({
+                where: {
+                    userId: user.id,
+                    courseId: Number(courseId)
+                }
+            });
+
+            if (existingEnrollment) {
+                return res.status(400).json({ message: "You are already enrolled in this course" });
+            }
+
             const response = await client.enrollment.create({
-                data : {
+                data: {
                     userId: user.id,
                     courseId: Number(courseId)
                 }
@@ -238,7 +304,7 @@ export const enrollCourse = async (req: Request, res: Response) => {
                 course: response
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in enrolling course",
@@ -255,8 +321,8 @@ export const getUserCourses = async (req: Request, res: Response) => {
     const user = req.user;
     console.log('User object:', user);
     console.log('User role:', user?.role);
-    if(user.role==="STUDENT"){
-        try{
+    if (user.role === "STUDENT") {
+        try {
             const userId = user.id;
             const courses = await client.enrollment.findMany({
                 where: {
@@ -267,14 +333,14 @@ export const getUserCourses = async (req: Request, res: Response) => {
                 }
             })
             console.log(courses);
-            if(!courses || courses.length===0){
+            if (!courses || courses.length === 0) {
                 return res.status(404).json({ message: "You are not enrolled in any courses" });
             }
             res.json({
                 courses: courses
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in fetching courses",
@@ -290,8 +356,8 @@ export const getUserCourses = async (req: Request, res: Response) => {
 export const addReview = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    if(user.role==="STUDENT"){
-        try{
+    if (user.role === "STUDENT") {
+        try {
             const { courseId } = req.params;
             const { rating, comment } = req.body;
 
@@ -309,7 +375,7 @@ export const addReview = async (req: Request, res: Response) => {
                 review: response
             })
         }
-        catch(error){
+        catch (error) {
             console.error(error);
             res.status(500).json({
                 message: "Error in adding review",
@@ -321,8 +387,8 @@ export const addReview = async (req: Request, res: Response) => {
     }
 }
 
-export const getReviews = async (req: Request, res: Response) =>{
-    try{
+export const getReviews = async (req: Request, res: Response) => {
+    try {
         const { courseId } = req.params;
         const reviews = await client.review.findMany({
             where: {
@@ -334,7 +400,7 @@ export const getReviews = async (req: Request, res: Response) =>{
                         username: true,
                     },
                 },
-                course:{
+                course: {
                     select: {
                         title: true,
                         instructor: {
@@ -351,7 +417,7 @@ export const getReviews = async (req: Request, res: Response) =>{
             reviews: reviews
         })
     }
-    catch(error){
+    catch (error) {
         console.error(error);
         res.status(500).json({
             message: "Error in fetching reviews",
