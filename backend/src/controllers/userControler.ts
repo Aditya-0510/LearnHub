@@ -25,7 +25,7 @@ export const signUp = async(req: Request, res: Response)=>{
         })
     }
 
-    console.log(email);
+    // console.log(email);
     try{
         const existingUser = await client.user.findFirst({ 
             where: {
@@ -64,14 +64,14 @@ export const signUp = async(req: Request, res: Response)=>{
 export const signIn = async(req: Request,res: Response)=>{
 
     const { email, password } = req.body;
-    console.log(email + password);
+    // console.log(email + password);
     try{
          const user = await client.user.findFirst({ 
             where: {
                 email: email
             }
         });
-        console.log(user);
+        // console.log(user);
         if(!user){
             return res.status(401).send({
                 message: "user not found",

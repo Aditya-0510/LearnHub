@@ -4,7 +4,7 @@ import client from "../prismaClient";
 export const getAllCourses = async (req: Request, res: Response) => {
     try {
         const response = await client.course.findMany({});
-        console.log(response);
+        // console.log(response);
 
         res.json({
             courses: response
@@ -64,7 +64,7 @@ export const getCourseById = async (req: Request, res: Response) => {
 export const createCourse = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    console.log(user);
+    // console.log(user);
     if (user.role === "INSTRUCTOR") {
         try {
             const { title, description } = req.body;
@@ -75,7 +75,7 @@ export const createCourse = async (req: Request, res: Response) => {
                     instructorId: user.id
                 }
             })
-            console.log(response);
+            // console.log(response);
 
             res.json({
                 message: "course added",
@@ -97,7 +97,7 @@ export const createCourse = async (req: Request, res: Response) => {
 export const getInstructorCourses = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    console.log(user);
+    // console.log(user);
     if (user.role === "INSTRUCTOR") {
         try {
             const courses = await client.course.findMany({
@@ -105,7 +105,7 @@ export const getInstructorCourses = async (req: Request, res: Response) => {
                     instructorId: user.id
                 },
             })
-            console.log(courses);
+            // console.log(courses);
 
             res.json({
                 courses: courses
@@ -150,7 +150,7 @@ export const addLesson = async (req: Request, res: Response) => {
                     courseId: Number(courseId),
                 }
             })
-            console.log(response);
+            // console.log(response);
 
             res.json({
                 message: "course added",
@@ -208,7 +208,7 @@ export const getLessons = async (req: Request, res: Response) => {
                 id: 'asc'
             }
         })
-        console.log(lessons);
+        // console.log(lessons);
 
         res.json({
             lessons: lessons
@@ -252,7 +252,7 @@ export const updateLesson = async (req: Request, res: Response) => {
                     content: content
                 }
             })
-            console.log(response);
+            // console.log(response);
 
             res.json({
                 message: "lesson updated",
@@ -297,7 +297,7 @@ export const enrollCourse = async (req: Request, res: Response) => {
                     courseId: Number(courseId)
                 }
             })
-            console.log(response);
+            // console.log(response);
 
             res.json({
                 message: "course enrolled",
@@ -319,8 +319,8 @@ export const enrollCourse = async (req: Request, res: Response) => {
 export const getUserCourses = async (req: Request, res: Response) => {
     //@ts-ignore
     const user = req.user;
-    console.log('User object:', user);
-    console.log('User role:', user?.role);
+    // console.log('User object:', user);
+    // console.log('User role:', user?.role);
     if (user.role === "STUDENT") {
         try {
             const userId = user.id;
@@ -332,7 +332,7 @@ export const getUserCourses = async (req: Request, res: Response) => {
                     course: true
                 }
             })
-            console.log(courses);
+            // console.log(courses);
             if (!courses || courses.length === 0) {
                 return res.status(404).json({ message: "You are not enrolled in any courses" });
             }
@@ -369,7 +369,7 @@ export const addReview = async (req: Request, res: Response) => {
                     courseId: Number(courseId)
                 }
             })
-            console.log(response);
+            // console.log(response);
             res.json({
                 message: "review added",
                 review: response
@@ -412,7 +412,7 @@ export const getReviews = async (req: Request, res: Response) => {
                 }
             }
         })
-        console.log(reviews);
+        // console.log(reviews);
         res.json({
             reviews: reviews
         })
