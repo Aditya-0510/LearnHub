@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { Button } from '../../components/Button';
 import { useState } from 'react';
-import axios from 'axios';
+import axios , { AxiosError } from 'axios';
 import { useLoader } from '@/app/hooks/useLoader';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext'
@@ -17,6 +17,22 @@ interface FormErrors {
     password: string;
     general: string;
 }
+
+type BackendFieldError = {
+  _errors?: string[];
+};
+
+type BackendErrorResponse =
+  | {
+      error?: {
+        _errors?: string[];
+        email?: BackendFieldError;
+        password?: BackendFieldError;
+        general?: BackendFieldError;
+        [key: string]: BackendFieldError | string[] | undefined;
+      };
+    }
+  | { error?: string };
 
 export default function Register(){
     const { checkAuth } = useAuth()
@@ -75,48 +91,69 @@ export default function Register(){
             window.dispatchEvent(new Event('authStateChanged'));
             router.push('/dashboard')
         } 
-        catch (error:any) {
-            console.log('Full error:', error.response?.data);
-            
-            if (error.response?.data?.error) {
-                const backendErrors = error.response.data.error;
-                
-                const transformedErrors: FormErrors = {
-                    email: '',
-                    password: '',
-                    general: ''
-                };
-                
-                if (typeof backendErrors === 'object' && backendErrors !== null) {
-                    const fieldMapping: { [key: string]: keyof FormErrors } = {
-                        'email': 'email',
-                        'password': 'password',
-                        'general':'general'  
-                    };
-                    
-                    Object.entries(backendErrors).forEach(([field, fieldError]: [string, any]) => {
-                        if (field === '_errors' && Array.isArray(fieldError) && fieldError.length > 0) {
-                            transformedErrors.general = fieldError[0];
-                        } 
-                        else if (fieldError && fieldError._errors && Array.isArray(fieldError._errors) && fieldError._errors.length > 0) {
-                            const frontendField = fieldMapping[field];
-                            if (frontendField) {
-                                transformedErrors[frontendField] = fieldError._errors[0];
-                            }
-                        }
-                    });
-                } 
-                else if (typeof backendErrors === 'string') {
-                    transformedErrors.general = backendErrors;
-                }
-                setErrors(transformedErrors);
-            } 
-            else {
+        catch (error:unknown) {
+            if (!axios.isAxiosError(error)) {
                 setErrors(prev => ({
                     ...prev,
                     general: 'Registration failed. Please try again.'
                 }));
+                return;
             }
+            
+            const data = error.response?.data as BackendErrorResponse | undefined;
+            const backendErrors = data?.error;
+
+            const transformedErrors: FormErrors = {
+                email: '',
+                password: '',
+                general: ''
+            };
+
+            if (!backendErrors) {
+                setErrors(prev => ({
+                    ...prev,
+                    general: 'Registration failed. Please try again.'
+                }));
+                return;
+            }
+
+            if (typeof backendErrors === 'string') {
+                transformedErrors.general = backendErrors;
+                setErrors(transformedErrors);
+                return;
+            }
+
+            const fieldMapping: Record<string, keyof FormErrors> = {
+                email: 'email',
+                password: 'password',
+                general: 'general'
+            };
+
+            Object.entries(backendErrors).forEach(
+                ([field, value]: [string, BackendFieldError | string[] | undefined]) => {
+                // Global errors
+                if (field === '_errors' && Array.isArray(value) && value.length > 0) {
+                    transformedErrors.general = value[0];
+                    return;
+                }
+
+                // Field-specific errors
+                if (
+                    value &&
+                    typeof value === 'object' &&
+                    '_errors' in value &&
+                    Array.isArray(value._errors) &&
+                    value._errors.length > 0
+                ) {
+                    const frontendField = fieldMapping[field];
+                    if (frontendField) {
+                    transformedErrors[frontendField] = value._errors[0];
+                    }
+                }
+                }
+            );
+
+            setErrors(transformedErrors);
         } 
         finally{
             setLoading(false)

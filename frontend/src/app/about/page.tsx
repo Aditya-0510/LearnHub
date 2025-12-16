@@ -1,6 +1,6 @@
 "use client"
 import React from 'react';
-import { BookOpen, Users, Award, Video, MessageSquare, TrendingUp, CheckCircle, Star, Target, Zap, Shield, Heart } from 'lucide-react';
+import { BookOpen, Users, CheckCircle, Target, Shield, Heart } from 'lucide-react';
 
 export default function AboutPage() {
   return (
