@@ -23,6 +23,3 @@ A comprehensive course management application designed for instructors to create
 -   **ORM**: [Prisma 6](https://www.prisma.io/)
 -   **Database**: PostgreSQL 
 -   **Authentication**: JWT & Bcrypt
-
-
-### Made with Love by Aditya
