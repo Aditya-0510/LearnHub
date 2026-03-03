@@ -30,10 +30,11 @@ pipeline {
             steps {
                 sh '''
                 docker run -d \
-                  --name $CONTAINER_NAME \
-                  -p 4000:4000 \
-                  --env-file backend/.env \
-                  $IMAGE_NAME
+                --name $CONTAINER_NAME \
+                -p 4000:4000 \
+                -e DATABASE_URL="postgresql://postgres:password@course_app-db-1:5432/courseapp" \
+                -e JWT_SECRET="hahaha" \
+                $IMAGE_NAME
                 '''
             }
         }
