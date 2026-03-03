@@ -41,7 +41,7 @@ pipeline {
         stage('Health Check') {
             steps {
                 sh 'sleep 10'
-                sh 'docker exec $CONTAINER_NAME curl -f http://localhost:4000/health
+                sh 'docker exec $CONTAINER_NAME curl -f http://localhost:4000/health'
             }
         }
     }
