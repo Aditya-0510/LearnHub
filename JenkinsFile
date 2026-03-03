@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE_NAME = "course_app_backend"
+        CONTAINER_NAME = "course_app_backend_ci"
+    }
+
     stages {
 
         stage('Checkout') {
@@ -9,10 +14,27 @@ pipeline {
             }
         }
 
-        stage('Build & Deploy') {
+        stage('Build Image') {
             steps {
-                sh 'docker compose down'
-                sh 'docker compose up -d --build'
+                sh 'docker build -t $IMAGE_NAME ./backend'
+            }
+        }
+
+        stage('Stop Old Container') {
+            steps {
+                sh 'docker rm -f $CONTAINER_NAME || true'
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh '''
+                docker run -d \
+                  --name $CONTAINER_NAME \
+                  -p 4000:4000 \
+                  --env-file backend/.env \
+                  $IMAGE_NAME
+                '''
             }
         }
 
@@ -26,10 +48,10 @@ pipeline {
 
     post {
         success {
-            echo '🚀 Deployment Successful'
+            echo 'Deployment Successful'
         }
         failure {
-            echo '❌ Deployment Failed'
+            echo 'Deployment Failed'
         }
     }
 }
