@@ -64,13 +64,15 @@ export const signUp = async(req: Request, res: Response)=>{
 export const signIn = async(req: Request,res: Response)=>{
 
     const { email, password } = req.body;
+    console.log("EMAIL RECEIVED:", email);
     // console.log(email + password);
     try{
-         const user = await client.user.findFirst({ 
+        const user = await client.user.findFirst({ 
             where: {
                 email: email
             }
         });
+        console.log("USER FOUND:", user);
         // console.log(user);
         if(!user){
             return res.status(401).send({
@@ -106,3 +108,20 @@ export const signIn = async(req: Request,res: Response)=>{
         })
     }
 }
+
+export const getAllUsers = async (req: any, res: any) => {
+  try {
+    const users = await client.user.findMany({
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true
+      }
+    });
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+};

@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
 import client from "../prismaClient";
+import { generateSignedVideoUrl } from "../utils/getSignedUrl";
+import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { s3 } from "../config/s3";
 
 export const getAllCourses = async (req: Request, res: Response) => {
     try {
@@ -424,3 +427,131 @@ export const getReviews = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const uploadLessonVideo = async (req: any, res: any) => {
+  try {
+    const { lessonId } = req.params;
+
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({
+        message: "No video uploaded"
+      });
+    }
+
+    
+
+    const lesson = await client.lesson.findUnique({
+      where: { id: Number(lessonId) }
+    });
+
+    if (!lesson) {
+      return res.status(404).json({
+        message: "Lesson not found"
+      });
+    }
+
+    // 🔹 delete old video if exists
+    if (lesson.videoKey) {
+      await s3.send(
+        new DeleteObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME!,
+          Key: lesson.videoKey
+        })
+      );
+    }
+
+    const videoKey = file.key;
+
+    // update key in DB
+    await client.lesson.update({
+      where: { id: Number(lessonId) },
+      data: {
+        videoKey: videoKey
+      }
+    });
+
+    // Generate signed URL
+    const signedUrl = await generateSignedVideoUrl(videoKey);
+
+    res.json({
+      message: "Video uploaded successfully",
+      videoUrl: signedUrl,
+      lesson
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error uploading video"
+    });
+  }
+
+};
+
+
+export const getLessonVideo = async (req: any, res: any) => {
+  try {
+    const { lessonId } = req.params;
+
+    const lesson = await client.lesson.findUnique({
+      where: { id: Number(lessonId) }
+    });
+
+    if (!lesson || !lesson.videoKey) {
+      return res.status(404).json({
+        message: "Video not found"
+      });
+    }
+
+    const url = await generateSignedVideoUrl(lesson.videoKey);
+
+    res.json({
+      videoUrl: url
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Error generating video URL"
+    });
+  }
+};
+
+export const deleteLessonVideo = async (req: any, res: any) => {
+  try {
+    const { lessonId } = req.params;
+
+    const lesson = await client.lesson.findUnique({
+      where: { id: Number(lessonId) }
+    });
+
+    if (!lesson || !lesson.videoKey) {
+      return res.status(404).json({
+        message: "Video not found"
+      });
+    }
+
+    await s3.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME!,
+        Key: lesson.videoKey
+      })
+    );
+
+    await client.lesson.update({
+      where: { id: Number(lessonId) },
+      data: {
+        videoKey: null
+      }
+    });
+
+    res.json({
+      message: "Video deleted"
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: "Failed to delete video"
+    });
+  }
+};

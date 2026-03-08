@@ -11,8 +11,13 @@ import {
   getReviews,
   getInstructorCourses,
   getCourseById,
-  updateLesson
+  updateLesson,
+  uploadLessonVideo,
+  getLessonVideo,
+  deleteLessonVideo 
 } from "../controllers/courseController";
+
+import { videoUpload } from "../middleware/upload";
 
 const courseRouter = Router();
 
@@ -33,5 +38,9 @@ courseRouter.post("/:courseId/enroll", enrollCourse)     //s
 
 courseRouter.post("/:courseId/reviews", addReview)      //s
 courseRouter.get("/:courseId/reviews", getReviews)      //s + i
+
+courseRouter.post("/:courseId/lessons/:lessonId/video",videoUpload.single("video"),uploadLessonVideo)      //i
+courseRouter.get("/:courseId/lessons/:lessonId/video", getLessonVideo);
+courseRouter.delete("/:courseId/lessons/:lessonId/video", deleteLessonVideo);
 
 export default courseRouter
