@@ -31,11 +31,13 @@ model Course {
 }
 
 model Lesson {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   title    String
   content  String
-  course   Course @relation(fields: [courseId], references: [id])
+  course   Course  @relation(fields: [courseId], references: [id])
   courseId Int
+  videoKey String?
+  videoUrl String?
 }
 
 model Enrollment {
